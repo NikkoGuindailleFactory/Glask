@@ -1,4 +1,4 @@
-package com.example.nicolas.glaskwifi;
+package com.example.nicolas.glaskbt;
 
 import android.os.Handler;
 
@@ -92,9 +92,11 @@ public class Glask {
 
     // @pre : -
     // @post : une chaine de valeurs structurées pour l'électronique
-    public String formatOut()
+    public byte[] formatOut()
     {
-        return Integer.toString(this.id) + ";" + Integer.toString(this.R) + ";" + Integer.toString(this.G) + ";" + Integer.toString(this.B) + ";" + Integer.toString(this.vibrate) + ";";
+        byte response[] = {-1, (byte) this.id, (byte) (this.R/2), (byte) (this.G/2), (byte) (this.B/2), (byte) this.vibrate};
+        return response;
+        //return Integer.toString(this.id) + ";" + Integer.toString(this.R) + ";" + Integer.toString(this.G) + ";" + Integer.toString(this.B) + ";" + Integer.toString(this.vibrate) + ";";
     }
 
     // @pre : R, G et B des entiers

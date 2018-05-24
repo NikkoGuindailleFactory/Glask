@@ -1,4 +1,4 @@
-package com.example.nicolas.glaskwifi;
+package com.example.nicolas.glaskbt;
 
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -21,7 +21,7 @@ import java.util.Random;
 abstract class GlaskPlayers {
     List<Glask> players;
     List<Integer> playersID;
-    List<String> stack;
+    List<Integer> stack;
     List<Integer> isFilled;
     List<Integer> isAffoning;
     List<Integer> isShaked;
@@ -36,93 +36,7 @@ abstract class GlaskPlayers {
         this.isFilled = new ArrayList<Integer>();
         this.isAffoning = new ArrayList<Integer>();
         this.isShaked= new ArrayList<Integer>();
-        this.stack = new ArrayList<String>();
-        sending.postDelayed(runnable, 1000);
-    }
-
-    private Runnable runnable = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            if(isOnline())
-            {
-                if(toPush())
-                {
-                    String s = push();
-                    new HTTPAsyncTask().execute("http://192.168.4.1/void?arg=" + s);
-                }
-                else
-                {
-                    i = i + 1;
-                    if(i == 3) {
-                        new HTTPAsyncTask().execute("http://192.168.4.1/void");
-                        i = 0;
-                    }
-                }
-                sync();
-
-            }
-            else
-            {
-                new HTTPAsyncTask().execute("http://192.168.4.1/void");
-            }
-            sending.postDelayed(this, 300);
-        }
-    };
-
-    private String HttpGet(String myUrl) throws IOException {
-        InputStream inputStream = null;
-        String result = "";
-        URL url = new URL(myUrl);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.connect();
-        inputStream = conn.getInputStream();
-        if(inputStream != null)
-            result = convertInputStreamToString(inputStream);
-        return result;
-    }
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException{
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
-        inputStream.close();
-        return result;
-
-    }
-
-    private class HTTPAsyncTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
-            try {
-                return HttpGet(urls[0]);
-            } catch (IOException e) {
-                return "Unable to retrieve web page. URL may be invalid.";
-            }
-        }
-        @Override
-        protected void onPostExecute(String result) {
-            if(result.contains("#"))
-            {
-                String[] sub = result.split("#");
-                for(int i = 0; i < sub.length; i++)
-                {
-                    String[] playerStates = (sub[i]).split(";");
-                    if (playerStates.length > 7)
-                    {
-                        int id = Integer.parseInt(playerStates[0]);
-                        boolean isFilled = (Integer.parseInt(playerStates[5]) == 1);
-                        boolean isDrinking = (Integer.parseInt(playerStates[6]) == 1);
-                        double lastTime = Double.parseDouble(playerStates[7]);
-                        int shaked = Integer.parseInt(playerStates[8]);
-                        set(id, isFilled, isDrinking, lastTime, shaked);
-                    }
-                }
-            }
-        }
+        this.stack = new ArrayList<Integer>();
     }
 
     // @pre : un objet Glask
@@ -155,9 +69,12 @@ abstract class GlaskPlayers {
         }
         else
         {
-            this.playersID.add(id);
-            Glask temp = new Glask(id, 0, 0, 0, 0, isFilled, isDrinking, lastTime, shaked);
-            this.players.add(temp);
+            if(id > 0)
+            {
+                this.playersID.add(id);
+                Glask temp = new Glask(id, 0, 0, 0, 0, isFilled, isDrinking, lastTime, shaked);
+                this.players.add(temp);
+            }
         }
     }
 
@@ -184,15 +101,15 @@ abstract class GlaskPlayers {
 
     // @pre : -
     // @post : toutes les chaines de valeurs structurées pour l'électronique
-    public String[] formatOut()
+    public int formatOut()
     {
-        String[] f = new String[this.numOfPlayers()];
-        for(int i = 0; i < this.numOfPlayers(); i++)
-        {
-            f[i] = getById(i).formatOut();
-
-        }
-        return f;
+//        String[] f = new String[this.numOfPlayers()];
+//        for(int i = 0; i < this.numOfPlayers(); i++)
+//        {
+//            f[i] = getById(i).formatOut();
+//
+//        }
+        return -1;
     }
 
     // @pre : des entiers id, R, G et B
@@ -200,7 +117,7 @@ abstract class GlaskPlayers {
     public void RGBById(int id, int R, int G, int B)
     {
         getById(id).RGB(R, G, B);
-        stack.add(this.players.get(this.playersID.indexOf(id)).formatOut());
+        stack.add(id);
     }
 
     public void RGBByIdRandom(int id)
@@ -225,7 +142,7 @@ abstract class GlaskPlayers {
         if(u > 0)
         {
             getById(id).RGB(color[i][0], color[i][1], color[i][2]);
-            stack.add(this.players.get(this.playersID.indexOf(id)).formatOut());
+            stack.add(id);
         }
         else
         {
@@ -258,7 +175,7 @@ abstract class GlaskPlayers {
             for(int j = 0; j < id.size(); j++)
             {
                 getById(id.get(j)).RGB(color[i][0], color[i][1], color[i][2]);
-                stack.add(getById(id.get(j)).formatOut());
+                stack.add(id.get(j));
             }
         }
         else
@@ -274,10 +191,10 @@ abstract class GlaskPlayers {
     public void vibrateById(int id, int ... state)
     {
         getById(id).vibrate(state);
-        stack.add(this.players.get(this.playersID.indexOf(id)).formatOut());
+        stack.add(id);
     }
 
-    public List<Integer> isSomeoneAffoning()
+    public List<Integer> isAffoning()
     {
         List<Integer> result = new ArrayList<Integer>();
         for(int i = 0; i < this.numOfPlayers(); i++)
@@ -305,16 +222,16 @@ abstract class GlaskPlayers {
         return result;
     }
 
-    public String push()
+    public int push()
     {
-        String s = "";
+        int id;
         if(this.stack.size() > 0)
         {
-            s = this.stack.get(0);
+            id = this.stack.get(0);
             this.stack.remove(0);
         }
-        else { s = ""; }
-        return s;
+        else { id = -1; }
+        return id;
     }
 
     public void sync()
