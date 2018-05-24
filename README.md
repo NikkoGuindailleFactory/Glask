@@ -7,7 +7,7 @@ Glask : développement du code (ESP8266 et Java)
 
 
 ## Mise à jour
-- 24/05/2018 : envoi/réception des données en bytes et en bluetooth
+- 24/05/2018 : envoi/réception des données en bytes et en bluetooth.
 - 19/05/2018 : requête HTTP avec arguments multiples, optimisation.
 
 # Software : Android
