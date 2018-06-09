@@ -215,35 +215,6 @@ void setup()
   server.on("/debug", handle_debug);
   server.begin();
   Serial.println("HTTP server started");
-
-
-  //stack[0] = 1; //=!= id
-  //stack[1] = 2;
-
-  //players[0][0] = 27;
-  //players[0][1] = 200; //R
-  //players[0][2] = 255; //G
-  //players[0][3] = 255; //B
-  //players[0][4] = 0; //vib
-  //players[0][5] = 10; //isFilled
-  //players[0][6] = -10; //isDrinking
-  //players[0][7] = 1500; //lastTime
-  //players[0][8] = 72; //shaked
-
-  //players[1][0] = 18;
-  //players[1][1] = 200; //R
-  //players[1][2] = 108; //G
-  //players[1][3] = 255; //B
-  //players[1][4] = 1; //vib
-  //players[1][5] = -10; //isFilled
-  //players[1][6] = 10; //isDrinking
-  //players[1][7] = 2000; //lastTime
-  //players[1][8] = 64; //shaked
-
-  //stack[0] = 0; //=!= id
-  //stack[1] = 1;
-  
-  //nStack = 2;
 }
 
 
@@ -261,34 +232,6 @@ void loop()
       debug += String(((int) buff[i])) + ";";
       if(buff[i] == (byte) -2)
       {
-        //if(nStack > 0)
-        //{
-        //  short key = -1;
-        //  boolean push = true;
-        //  char message[nStack*8 + 2];
-        //  for(int i=0; i < maxPlayers;i++)
-        //  {
-        //    if(stack[i] != 0)
-        //    {
-        //      message[i*8 + 0] = -34;//                                                    0 8
-        //      message[i*8 + 1] = key;//                                                    1 9 
-        //      message[i*8 + 2] = players[stack[i]][0]; //id //i+1                          2 10
-        //      message[i*8 + 3] = players[stack[i]][5]; //isFilled //i+2                    3 11
-        //      message[i*8 + 4] = players[stack[i]][6]; //isDrinking //i+3                  4 12
-        //      message[i*8 + 5] = (players[stack[i]][7] & 0xFF); //lastTime //i+4           5 13
-        //      message[i*8 + 6] = ((players[stack[i]][7] >> 8) & 0xFF); //lastTime          6 14
-        //      message[i*8 + 7] = players[stack[i]][8]; //shaked                            7 15
-        //      stack[i] = 0; // on retire l'action faite de la stack       
-        //    }
-        //  }
-        //  message[nStack*8] = -2;  // 16
-        //  message[nStack*8 + 1] = -3; //17
-        //  //byte message[] = {(byte) 22, (byte) key, (byte) id, (byte) isFilled, (byte) isDrinking, (byte) isAffoning, (byte) (lastTime & 0xFF), (byte) ((lastTime >> 8) & 0xFF)};
-        //  Serial.write(message, nStack*8 + 2); //16+2=18
-        //  //Serial.write(message, nStack*8 + 2);
-        //  //nStack = 0;
-        //}
-
         if(nStack > 0)
         {
             byte message[8*nStack + 2];
