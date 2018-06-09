@@ -7,6 +7,7 @@ Glask : développement du code (ESP8266 et Java)
 
 
 ## Mise à jour
+- 09/06/2018 : changement de librairie sur Android (Blue2Serial) utilée en raw bytes. Réception ok, envoi encore critique.
 - 24/05/2018 : envoi/réception des données en bytes et en bluetooth.
 - 19/05/2018 : requête HTTP avec arguments multiples, optimisation.
 
