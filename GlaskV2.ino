@@ -220,6 +220,7 @@ void setup()
   //Serial.println(WiFi.localIP());
 }
 
+//Performances ok mais besoin d'interrupts pour faire le truc proprement. Probablement pas utile.
 void loop() 
 {
   isDrinkingF();
