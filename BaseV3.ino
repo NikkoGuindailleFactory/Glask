@@ -60,6 +60,7 @@ int castShaked(int s)
   else { return s; }
 }
 
+//Recoit les infos des gobelets
 void handle_feed() 
 {
   if(server.args() > 1)
@@ -72,8 +73,11 @@ void handle_feed()
   
     boolean updated = false;
     String line;
-    // Cas ou le Glask est déjà dans le jeu
-    for(int i = 0; i < maxPlayers && !updated; i++)
+    // Cas ou le Glask est déjà dans le jeu.
+	// On update les infos envoyees par le glask et on lui envoie les infos de la base (vibrer et leds)
+	// Partie simplifiee par jide le 5/7/18: condense le code et evite certaines loops useless. modif mineure
+	int i = 0;
+    for(i = 0; i < maxPlayers && !updated && players[i][0]!= 0; i++)
     {
       if(players[i][0] == id)
       {
@@ -90,37 +94,32 @@ void handle_feed()
         updated = true;
       }
     }   
-    // Cas ou le Glask n'est pas encore dans le jeu : i.e il vient de se connecter
-    if(!updated)
+    // Cas ou le Glask n'est pas encore dans le jeu : i.e il vient de se connecter et on a pas atteint le nombre max de joueurs
+    if(!updated && players[i][0] == 0)
     {
-      boolean added = false;
-      for(int i = 0; i < maxPlayers && !added; i++)
-      {
-        if(players[i][0] == 0)
-        {
-          players[i][0] = id;
-          players[i][5] = cast(isfilled);
-          players[i][6] = cast(isdrinking);
-          players[i][7] = castTime(lastime);
-          players[i][8] = castShaked(shaked);
-          line = "#" + String(id) + ";" + String(players[i][1]) + ";" + String(players[i][2]) + ";" + String(players[i][3]) + ";" + String(players[i][4]);
-          stackAdd(i);
-          //Serial.println("Player added by Glask");
-          added = true;
-        }
-      }
-      if(!added)
-      {
-        //Serial.println("Too much players, da fuck ?");
-      }
+      players[i][0] = id;
+      players[i][5] = cast(isfilled);
+      players[i][6] = cast(isdrinking);
+      players[i][7] = castTime(lastime);
+      players[i][8] = castShaked(shaked);
+      line = "#" + String(id) + ";" + String(players[i][1]) + ";" + String(players[i][2]) + ";" + String(players[i][3]) + ";" + String(players[i][4]);
+      stackAdd(i);
+      //Serial.println("Player added by Glask");
+    }
+    else
+    {
+      //Serial.println("Too much players, da fuck ?");
+	  line = "Error, too many Glasks connected";
     }
     server.send(200, "text/plain", line);
   }
+  
+  //Le gobelet n'a envoye aucune info, renvoie juste les instructions de la base
   else
   {
     int id = (server.arg(0)).toInt();
     boolean found = false;
-    for(int i = 0; i < maxPlayers && !found; i++)
+    for(int i = 0; i < maxPlayers && !found && players[i][0]!= 0; i++)
     {
       if(players[i][0] == id)
       {
@@ -148,6 +147,7 @@ void handle_debug()
   server.send(200, "text/plain", debug);
 }
 
+//????
 void handle_void() 
 {
   String commandIn = server.arg(0);
@@ -159,7 +159,7 @@ void handle_void()
 
   boolean updated = false;
   
-  for(int i = 0; i < maxPlayers && !updated; i++)
+  for(int i = 0; i < maxPlayers && !updated && players[i][0]!= 0; i++)
   {
     if(players[i][0] == id)
     {
@@ -189,6 +189,7 @@ void handle_void()
   server.send(200, "text/plain", result);
 }
 
+//Demarre le point d'acces wifi
 void setup()
 {
   Serial.begin(9600);
@@ -217,7 +218,7 @@ void setup()
   Serial.println("HTTP server started");
 }
 
-
+//Gere la communication entre l'app bluetooth et les gobelets wifi
 void loop()
 {
   server.handleClient();
@@ -228,7 +229,7 @@ void loop()
     boolean stop = false;
     for(int i=0; i < receveidBuffLen && !stop;i++)
     {
-      // Si l'app envoie -2, c'est qu'elle se tait et que c'est à la base de parler
+      // Si l'app envoie -2, c'est qu'elle se tait et que c'est à la base de parler: elle envoie les etats de chaque gobelet
       debug += String(((int) buff[i])) + ";";
       if(buff[i] == (byte) -2)
       {
