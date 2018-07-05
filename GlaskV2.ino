@@ -25,6 +25,7 @@ boolean isAffoning = false;
 boolean isFilled = false;
 boolean isDrinking = false;
 int shaked = 0;
+int vibrating = 0;
 int R = 0;
 int G = 0;
 int B = 0;
@@ -33,6 +34,8 @@ boolean toUpdate = true; // permet d'ajouter automatiquement le glask dans l'arr
 
 ESP8266WebServer server (80);
 
+//@pre : recoit le string data contenant des donnees et eventuellement des occurences du separator.
+//@post : renvoie la substring situee apres la index-ieme occurence du separator et avant la suivante
 String getValue(String data, char separator, int index)
 {
   int found = 0;
@@ -127,7 +130,7 @@ void chrono()
     //Serial.println("Stop!");
     stopTime = millis();
     isAffoning = false;
-    unsigned long elapsed = stopTime - startTime;
+    unsigned long elapsed = stopTime - startTime; //utilite? pk pas direct lastTime
     delay(500);
     lastTime = elapsed;
     toUpdate = true;
@@ -143,20 +146,26 @@ void shaking()
 
 
 // @pre : vibratePin
-// @post : fait vibrer le glask pendant 500ms
+// @post : fait vibrer le glask ou l'arrete. L'arrete automatiquement apres 500 cycles sans reset de la part de la base (+ de 5sec)
 void vibration(int vib)
 {
   if(vib == 1)
   {
-    digitalWrite(vibratePin, HIGH);
+	if(vibrating < 500){
+		digitalWrite(vibratePin, HIGH);
+		vibrating++;
+	} else{
+		digitalWrite(vibratePin, LOW);
+	}
   }
   else
   {
     digitalWrite(vibratePin, LOW);
+	vibrating=0;
   }
 }
 
-void formatOut(String &dest)
+void formatOut(String &dest) //Methode chelou d'utilisation des pointeurs mais why not :p
 {
   String uniqueid = String(id);
   String red = String(R);
@@ -241,7 +250,7 @@ void loop()
       int B = (getValue(payload,';',3)).toInt();
       RGB(R, G, B);
       int vib = (getValue(payload,';',4)).toInt();
-      vibration(vib);  
+      vibration(vib);  //Ajouter un timeout a la vibration jusqu'a ce qu'elle soit reset
     } 
     else 
     {
@@ -252,16 +261,18 @@ void loop()
 
   delay(10);
   // Les 2 conditions permettent de ne "retenir" le shaked que le temps de 10 loop
-  if(shaked > 0 && timeShaked > 5)
-  {
-    shaked = 0; 
-    timeShaked = 0;
-    toUpdate = true;
-  }
+  // !! Modifie par jide le 5/7/18
 
   if(shaked > 0)
   {
-    timeShaked = timeShaked + 1;
+	if(timeShaked > 5)
+	{
+		shaked = 0; 
+		timeShaked = 0;
+	} else{
+		timeShaked++;
+	}
     toUpdate = true;
   }
+  
 }
